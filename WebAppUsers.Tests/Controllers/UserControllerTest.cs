@@ -96,8 +96,5 @@ namespace WebAppUsers.Tests.Controllers
             Assert.AreEqual(result, "OK");
         }
 
-
-
-
     }
 }
