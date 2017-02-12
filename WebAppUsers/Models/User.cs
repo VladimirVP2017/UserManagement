@@ -8,9 +8,17 @@ namespace WebAppUsers.Models
 {
     public class User:TableEntity
     {
-        public int Id { get; set; }
+     
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public int Age { get; set; }
+
+        public User(int userId, string userCategory)
+        {
+            this.RowKey = userId.ToString();
+            this.PartitionKey = userCategory;
+        }
+        public User() { }
+
     }
 }
