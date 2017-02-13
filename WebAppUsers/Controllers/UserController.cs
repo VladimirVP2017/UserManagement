@@ -13,23 +13,16 @@ namespace WebAppUsers.Controllers
 {
     public class UserController : ApiController
     {
-        string _connectionString; //= ConfigurationManager.ConnectionStrings["StorageConnection"].ToString();
+        
         
 
         public IEnumerable<User> GetAllUsers()
         {
             List<User> users = new List<User>();
-            _connectionString = ConfigurationManager.ConnectionStrings["StorageConnection"].ToString();
-            List<User> _records = new List<User>();
 
-            //Create a storage account object.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(_connectionString);
-
-            // Create the table client.
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
+           
             // Retrieve a reference to the table.
-            CloudTable table = tableClient.GetTableReference("users");
+            var table = new DAL.DBUtils().Table;
 
             TableQuery<User> query = new TableQuery<User>();
 
@@ -51,27 +44,23 @@ namespace WebAppUsers.Controllers
         public IHttpActionResult GetUser(int id)
         {
 
-             _connectionString = ConfigurationManager.ConnectionStrings["StorageConnection"].ToString();
+           
             List<User> _records = new List<User>();
-
-            //Create a storage account object.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(_connectionString);
-
-            // Create the table client.
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-            // Retrieve a reference to the table.
-            CloudTable table = tableClient.GetTableReference("users");
-
+            User user;
+            var table = new DAL.DBUtils().Table;
             TableOperation retrieveOperation = TableOperation.Retrieve<User>("User", id.ToString());
 
-            // Execute the retrieve operation.
-            TableResult retrievedResult = table.Execute(retrieveOperation);
+            try
+            {
+                // Execute the retrieve operation.
+                TableResult retrievedResult = table.Execute(retrieveOperation);
 
-
-            // Create the table if it doesn't exist.
-            table.CreateIfNotExists();
-            User user = retrievedResult.Result as User;
+                 user = retrievedResult.Result as User;
+            }
+            catch (Exception e)
+            {
+                return InternalServerError();
+            }
             if (user == null)
             {
                 return NotFound();
@@ -79,15 +68,16 @@ namespace WebAppUsers.Controllers
             return Ok(user);
         }
 
-        // POST api/Player
+        // POST api/User
         public string CreateUser(string userDomain, string userId, string firstName, string lastName, int age)
         {
             string sResponse = "";
-            _connectionString = ConfigurationManager.ConnectionStrings["StorageConnection"].ToString();
+            var table = new DAL.DBUtils().Table;
+            
 
-            // Create our player
+            // Create our user
 
-            // Create the entity with a partition key for sport and a row
+            // Create the entity with a partition key for user and a row
             // Row should be unique within that partition
             User item = new User(int.Parse(userId), userDomain);
 
@@ -95,15 +85,7 @@ namespace WebAppUsers.Controllers
             item.LastName = lastName;
             item.Age = age;
 
-            //Create a storage account object.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(_connectionString);
-
-            // Create the table client.
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-            // Retrieve a reference to the table.
-            CloudTable table = tableClient.GetTableReference("users");
-
+           
             // Create the TableOperation object that inserts the customer entity.
             TableOperation insertOperation = TableOperation.Insert(item);
 
@@ -125,11 +107,11 @@ namespace WebAppUsers.Controllers
         public string UpdateUser(string userDomain, string userId, string firstName, string lastName, int age, string etag)
         {
             string sResponse = "";
-            _connectionString = ConfigurationManager.ConnectionStrings["StorageConnection"].ToString();
+          
 
-            // Create our player
+          
 
-            // Create the entity with a partition key for sport and a row
+            // Create the entity with a partition key for user and a row
             // Row should be unique within that partition
             User item = new User(int.Parse(userId), userDomain);
 
@@ -137,15 +119,8 @@ namespace WebAppUsers.Controllers
             item.LastName = lastName;
             item.Age = age;
             item.ETag = etag;
-            //Create a storage account object.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(_connectionString);
-
-            // Create the table client.
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-            // Retrieve a reference to the table.
-            CloudTable table = tableClient.GetTableReference("users");
-
+            //Obtain a reference to CloudTable object.
+            var table = new DAL.DBUtils().Table;
             // Create the TableOperation object that inserts the customer entity.
             TableOperation updateOperation = TableOperation.Replace(item);
 
