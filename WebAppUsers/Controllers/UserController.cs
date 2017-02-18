@@ -45,7 +45,6 @@ namespace WebAppUsers.Controllers
         {
 
            
-            List<User> _records = new List<User>();
             User user;
             var table = new DAL.DBUtils().Table;
             TableOperation retrieveOperation = TableOperation.Retrieve<User>("User", id.ToString());
@@ -69,7 +68,7 @@ namespace WebAppUsers.Controllers
         }
 
         // POST api/User
-        public string CreateUser(string userDomain, string userId, string firstName, string lastName, int age)
+        public IHttpActionResult CreateUser(string userDomain, string userId, string firstName, string lastName, int age)
         {
             string sResponse = "";
             var table = new DAL.DBUtils().Table;
@@ -94,22 +93,22 @@ namespace WebAppUsers.Controllers
                 // Execute the insert operation.
                 table.Execute(insertOperation);
 
-                sResponse = "OK";
+                return Ok();
             }
             catch (Exception ex)
             {
-                sResponse = "Failed: " + ex.ToString();
+                return InternalServerError(ex);
             }
-            return sResponse;
+            
         }
 
         [HttpPut]
-        public string UpdateUser(string userDomain, string userId, string firstName, string lastName, int age, string etag)
+        public IHttpActionResult UpdateUser(string userDomain, string userId, string firstName, string lastName, int age, string etag)
         {
-            string sResponse = "";
-          
 
-          
+
+
+
 
             // Create the entity with a partition key for user and a row
             // Row should be unique within that partition
@@ -129,15 +128,13 @@ namespace WebAppUsers.Controllers
                 // Execute the insert operation.
                 table.Execute(updateOperation);
 
-                sResponse = "OK";
+                return Ok();
             }
             catch (Exception ex)
             {
-                sResponse = "Failed: " + ex.ToString();
+                return InternalServerError(ex);
             }
-            return sResponse;
-
-        }
+        }      
 
     }
 }

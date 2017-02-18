@@ -6,11 +6,12 @@ using WebAppUsers.Controllers;
 using WebAppUsers.Models;
 using System.Web.Http.Results;
 using System.Linq;
+using static System.Net.WebRequestMethods;
 
 namespace WebAppUsers.Tests.Controllers
 {
     /// <summary>
-    /// Summary description for UserControllerTest2
+    /// Summary description for UserControllerTest
     /// </summary>
     [TestClass]
     public class UserControllerTest
@@ -78,8 +79,9 @@ namespace WebAppUsers.Tests.Controllers
             var random = new Random();
             var max = int.MaxValue;
             var result = controller.CreateUser("User", random.Next(1, max).ToString(), "TestUserFirstName" + DateTime.Now, "TestUserLastName" + DateTime.Now, 27);
+            result = result as OkResult;
             Assert.IsNotNull(result);
-            Assert.AreEqual(result, "OK");
+           
         }
 
 
@@ -92,8 +94,9 @@ namespace WebAppUsers.Tests.Controllers
             OkNegotiatedContentResult<User> contentResult = controller.GetUser(6) as OkNegotiatedContentResult<User>;
             var userToUpdate = contentResult.Content;
             var result = controller.UpdateUser(userToUpdate.PartitionKey, userToUpdate.RowKey, "TestUserFirstName" + DateTime.Now, "TestUserLastName" + DateTime.Now, random.Next(1, maxAge), userToUpdate.ETag);
+            result = result as OkResult;
             Assert.IsNotNull(result);
-            Assert.AreEqual(result, "OK");
+            
         }
 
     }
