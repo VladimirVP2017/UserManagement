@@ -70,7 +70,7 @@ namespace WebAppUsers.Controllers
         // POST api/User
         public IHttpActionResult CreateUser(string userDomain, string userId, string firstName, string lastName, int age)
         {
-            string sResponse = "";
+         
             var table = new DAL.DBUtils().Table;
             
 
