@@ -58,7 +58,7 @@ namespace WebAppUsers.Controllers
             }
             catch (Exception e)
             {
-                return InternalServerError();
+                return InternalServerError(e);
             }
             if (user == null)
             {
