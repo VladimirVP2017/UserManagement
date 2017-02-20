@@ -30,14 +30,14 @@ namespace WebAppUsers.Controllers
        
 
 
-        public IHttpActionResult GetUser(int id, string rowKey)
+        public IHttpActionResult GetUser(int id, string partitionKey)
         {
             User user;
             using (DAL.DBUtils db = new DAL.DBUtils())
             {  
                 try
                 {
-                    user = db.GetById(id, rowKey);
+                    user = db.GetById(id, partitionKey);
                 }
                 catch (Exception e)
                 {

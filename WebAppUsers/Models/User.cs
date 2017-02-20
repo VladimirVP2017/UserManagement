@@ -6,7 +6,7 @@ using System.Web;
 
 namespace WebAppUsers.Models
 {
-    public class User:TableEntity
+    public class User: TableEntity
     {
      
         public string FirstName { get; set; }
