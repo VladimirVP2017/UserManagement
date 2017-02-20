@@ -55,21 +55,19 @@ namespace WebAppUsers.Tests.Controllers
         [TestMethod]
         public void GetAllUser_ShouldReturnAllUsers()
         {
-            
             var controller = new UserController();
-
-            var result = controller.GetAllUsers();
-            Assert.IsTrue(result.ToArray<User>().Length > 0);
+            var result = controller.GetAllUsers() as OkNegotiatedContentResult<IEnumerable<User>> ;
+            Assert.IsNotNull(result);
         }
 
-
+        
         [TestMethod]
         public void GetUser_ShouldReturnCorrectUser()
         {
             var controller = new UserController();
-            var result = controller.GetUser(3) as OkNegotiatedContentResult<User>;
+            var result = controller.GetUser(3, "User") as OkNegotiatedContentResult<User>;
             Assert.IsNotNull(result);
-            Assert.AreEqual(testUsers[0].FirstName, result.Content.FirstName);
+            Assert.AreEqual(testUsers[0].FirstName, ((User)result.Content).FirstName);
         }
 
         [TestMethod]
@@ -78,10 +76,15 @@ namespace WebAppUsers.Tests.Controllers
             var controller = new UserController();
             var random = new Random();
             var max = int.MaxValue;
-            var result = controller.CreateUser("User", random.Next(1, max).ToString(), "TestUserFirstName" + DateTime.Now, "TestUserLastName" + DateTime.Now, 27);
+            var user = new User();
+            user.PartitionKey = "User";
+            user.RowKey = random.Next(1, max).ToString();
+            user.FirstName = "TestUserFirstName" + DateTime.Now;
+            user.LastName = "TestUserLastName" + DateTime.Now;
+            user.Age = 37;
+            var result = controller.CreateUser(user);
             result = result as OkResult;
-            Assert.IsNotNull(result);
-           
+            Assert.IsNotNull(result);         
         }
 
 
@@ -89,11 +92,9 @@ namespace WebAppUsers.Tests.Controllers
         public void UpdateUser_ShouldReturnOk()
         {
             var controller = new UserController();
-            var random = new Random();
-            var maxAge = 100;
-            OkNegotiatedContentResult<User> contentResult = controller.GetUser(6) as OkNegotiatedContentResult<User>;
+            OkNegotiatedContentResult<User> contentResult = controller.GetUser(6, "User") as OkNegotiatedContentResult<User>;
             var userToUpdate = contentResult.Content;
-            var result = controller.UpdateUser(userToUpdate.PartitionKey, userToUpdate.RowKey, "TestUserFirstName" + DateTime.Now, "TestUserLastName" + DateTime.Now, random.Next(1, maxAge), userToUpdate.ETag);
+            var result = controller.UpdateUser(userToUpdate);
             result = result as OkResult;
             Assert.IsNotNull(result);
             

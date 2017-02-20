@@ -13,121 +13,70 @@ namespace WebAppUsers.Controllers
 {
     public class UserController : ApiController
     {
-        
-        
-
-        public IEnumerable<User> GetAllUsers()
+        public IHttpActionResult GetAllUsers()
         {
-            List<User> users = new List<User>();
-
-           
-            // Retrieve a reference to the table.
-            var table = new DAL.DBUtils().Table;
-
-            TableQuery<User> query = new TableQuery<User>();
-
-
-            foreach (var item in table.ExecuteQuery(query))
+            using (DAL.DBUtils db = new DAL.DBUtils())
             {
-                users.Add(new User()
+                try
                 {
-                    Age = item.Age,
-                    FirstName = item.FirstName,
-                    LastName = item.LastName,
-                    RowKey = item.RowKey,
-                });
+                    return Ok(db.GetAll());
+                }
+                catch (Exception ex)
+                {
+                    return InternalServerError(ex);
+                }
             }
-
-            return (IEnumerable<User>) users;
         }
+       
 
-        public IHttpActionResult GetUser(int id)
+
+        public IHttpActionResult GetUser(int id, string rowKey)
         {
-
-           
             User user;
-            var table = new DAL.DBUtils().Table;
-            TableOperation retrieveOperation = TableOperation.Retrieve<User>("User", id.ToString());
-
-            try
-            {
-                // Execute the retrieve operation.
-                TableResult retrievedResult = table.Execute(retrieveOperation);
-
-                 user = retrievedResult.Result as User;
+            using (DAL.DBUtils db = new DAL.DBUtils())
+            {  
+                try
+                {
+                    user = db.GetById(id, rowKey);
+                }
+                catch (Exception e)
+                {
+                    return InternalServerError(e);
+                }
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return Ok(user);
             }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user);
         }
 
         // POST api/User
-        public IHttpActionResult CreateUser(string userDomain, string userId, string firstName, string lastName, int age)
+        public IHttpActionResult CreateUser(User user)
         {
-         
-            var table = new DAL.DBUtils().Table;
-            
-
-            // Create our user
-
-            // Create the entity with a partition key for user and a row
-            // Row should be unique within that partition
-            User item = new User(int.Parse(userId), userDomain);
-
-            item.FirstName = firstName;
-            item.LastName = lastName;
-            item.Age = age;
-
-           
-            // Create the TableOperation object that inserts the customer entity.
-            TableOperation insertOperation = TableOperation.Insert(item);
-
-            try
+            using (var db = new DAL.DBUtils())
             {
-                // Execute the insert operation.
-                table.Execute(insertOperation);
-
-                return Ok();
+                try
+                {
+                    db.Create(user);
+                    return Ok();
+                }
+                catch(Exception ex)
+                {
+                    return InternalServerError(ex);
+                }
             }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
-            }
-            
         }
 
-        [HttpPut]
-        public IHttpActionResult UpdateUser(string userDomain, string userId, string firstName, string lastName, int age, string etag)
-        {
+       
 
-
-
-
-
-            // Create the entity with a partition key for user and a row
-            // Row should be unique within that partition
-            User item = new User(int.Parse(userId), userDomain);
-
-            item.FirstName = firstName;
-            item.LastName = lastName;
-            item.Age = age;
-            item.ETag = etag;
-            //Obtain a reference to CloudTable object.
-            var table = new DAL.DBUtils().Table;
-            // Create the TableOperation object that inserts the customer entity.
-            TableOperation updateOperation = TableOperation.Replace(item);
-
+        public IHttpActionResult UpdateUser(User user)
+        { 
+            using(DAL.DBUtils db = new DAL.DBUtils())
             try
             {
-                // Execute the insert operation.
-                table.Execute(updateOperation);
-
+             // Execute the update operation.
+                db.Update(user);
                 return Ok();
             }
             catch (Exception ex)
@@ -135,6 +84,5 @@ namespace WebAppUsers.Controllers
                 return InternalServerError(ex);
             }
         }      
-
     }
 }

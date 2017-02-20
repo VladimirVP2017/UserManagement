@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
+using WebAppUsers.Models;
 
 namespace WebAppUsers.DAL
 {
-    public class DBUtils
+    public class DBUtils : IDisposable
     {
         CloudStorageAccount storageAccount;
         CloudTableClient tableClient;
@@ -19,15 +20,40 @@ namespace WebAppUsers.DAL
             storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["StorageConnection"].ToString());
             //Create a Table Client Object
             tableClient = storageAccount.CreateCloudTableClient();
-
             //Create Table if it does not exist
             table = tableClient.GetTableReference("users");
             table.CreateIfNotExists();
         }
 
-        public CloudTable Table
+
+        public TableResult Create(User user)
         {
-            get { return table; }
+            TableOperation insertOperation = TableOperation.Insert(user);
+            // Execute the insert operation.
+            return table.Execute(insertOperation);
         }
-    }
+        public TableResult Update(User user)
+        {
+            TableOperation insertOperation = TableOperation.Replace(user);
+            // Execute the insert operation.
+            return table.Execute(insertOperation);
+        }
+        public IEnumerable<User> GetAll()
+        {
+            // Retrieve a reference to the table.
+            TableQuery<User> query = new TableQuery<User>();
+            return (IEnumerable<User>)table.ExecuteQuery(query);
+        }
+
+        public User GetById(int id, string rowKey)
+        {
+            TableOperation retrieveOperation = TableOperation.Retrieve<User>(rowKey, id.ToString());
+            return (User)table.Execute(retrieveOperation).Result;
+        }
+
+        public void Dispose()
+        {
+
+        }
+    }  
 }
